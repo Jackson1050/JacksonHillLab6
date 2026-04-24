@@ -1,0 +1,543 @@
+{
+  "info": {
+    "_postman_id": "037f9e47-db65-4133-bc2d-184b9953b174",
+    "name": "StudentRegister",
+    "description": "### Welcome to Postman! This is your first collection. \n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests\n• Test your API in real-world scenarios\n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53116271",
+    "_collection_link": "https://go.postman.co/collection/53116271-037f9e47-db65-4133-bc2d-184b9953b174?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Add Student",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Response structure is correct\", () => {\r",
+              "    pm.expect(jsonData).to.have.all.keys('id', 'name', 'major', 'gpa');\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Fields have correct types\", () => {\r",
+              "    pm.expect(jsonData.name).to.be.a('string');\r",
+              "    pm.expect(jsonData.major).to.be.a('string');\r",
+              "    pm.expect(jsonData.gpa).to.be.a('number');\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Check specific values\", () => {\r",
+              "    pm.expect(jsonData.gpa).to.be.at.most(4.0);\r",
+              "    pm.expect(jsonData.gpa).to.be.at.least(0.0);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Test string size\", () => {\r",
+              "    pm.expect(jsonData.name.length).to.be.at.most(255);\r",
+              "    pm.expect(jsonData.name.length).to.be.at.least(1);\r",
+              "});\r",
+              "\r",
+              "//Ensure the student count does not exceed classSize\r",
+              "let newStudent = pm.request.body.raw ? JSON.parse(pm.request.body.raw) : {};\r",
+              "let major = newStudent.major;\r",
+              "\r",
+              "pm.sendRequest({\r",
+              "    url: \"http://localhost:8080/api/students\",\r",
+              "    method: \"GET\"\r",
+              "}, function(err, res) {\r",
+              "    let students = res.json();\r",
+              "    let count = students.filter(student => student.major === major).length;\r",
+              "\r",
+              "    pm.sendRequest({\r",
+              "        url: \"http://localhost:8080/api/courses\",\r",
+              "        method: \"GET\"\r",
+              "    }, function(err, res) {\r",
+              "        let courses = res.json();\r",
+              "        let course = courses.find(c => c.name === major);\r",
+              "\r",
+              "        pm.test(\"Class size not exceeded\", () => {\r",
+              "            pm.expect(count + 1).to.be.at.most(course.classSize);\r",
+              "        });\r",
+              "    });\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"name\": \"Steve\",\r\n    \"major\": \"Computer Science\",\r\n    \"gpa\": 4\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/students",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "students"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Students",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", () => {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response time is less than 1000ms\", () => {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response body is not empty\", () => {\r",
+              "    pm.expect(pm.response.text()).to.not.be.empty;\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/students",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "students"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Student",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Response structure is correct\", () => {\r",
+              "    pm.expect(jsonData).to.have.all.keys('id', 'name', 'major', 'gpa');\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Fields have correct types\", () => {\r",
+              "    pm.expect(jsonData.name).to.be.a('string');\r",
+              "    pm.expect(jsonData.major).to.be.a('string');\r",
+              "    pm.expect(jsonData.gpa).to.be.a('number');\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Check specific values\", () => {\r",
+              "    pm.expect(jsonData.gpa).to.be.at.most(4.0);\r",
+              "    pm.expect(jsonData.gpa).to.be.at.least(0.0);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Name should not exceed 255 characters\", () => {\r",
+              "    pm.expect(jsonData.name.length).to.be.at.most(255);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Name should be at least 1 character\", () => {\r",
+              "    pm.expect(jsonData.name.length).to.be.at.least(1);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"id\": 1,\r\n    \"name\": \"Jackson Bill\",\r\n    \"major\": \"Computer Science\",\r\n    \"gpa\": 4.0\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/students",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "students"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Student",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Delete request successful\", () => {\r",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 202, 204]);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/students/5",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "students",
+            "5"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Student Course Count",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let students = pm.response.json();\r",
+              "\r",
+              "let count = students.filter(student => student.major === \"Computer Science\").length;\r",
+              "\r",
+              "console.log(\"Computer Science majors:\", count);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/students",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "students"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Add Course",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Response structure is correct\", () => {\r",
+              "    pm.expect(jsonData).to.have.all.keys('id', 'name', 'classSize');\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Fields have correct types\", () => {\r",
+              "    pm.expect(jsonData.name).to.be.a('string');\r",
+              "    pm.expect(jsonData.classSize).to.be.a('number');\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Check specific values\", () => {\r",
+              "    pm.expect(jsonData.classSize).to.be.at.least(1);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Test string size\", () => {\r",
+              "    pm.expect(jsonData.name.length).to.be.at.most(255);\r",
+              "    pm.expect(jsonData.name.length).to.be.at.least(1);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"name\": \"Computer Science\",\r\n    \"classSize\": 10\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/courses",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "courses"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Courses",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", () => {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response time is less than 1000ms\", () => {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response body is not empty\", () => {\r",
+              "    pm.expect(pm.response.text()).to.not.be.empty;\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/courses",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "courses"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Course",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Response structure is correct\", () => {\r",
+              "    pm.expect(jsonData).to.have.all.keys('id', 'name', 'classSize');\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Fields have correct types\", () => {\r",
+              "    pm.expect(jsonData.name).to.be.a('string');\r",
+              "    pm.expect(jsonData.classSize).to.be.a('number');\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Check specific values\", () => {\r",
+              "    pm.expect(jsonData.classSize).to.be.at.least(1);\r",
+              "})\r",
+              "\r",
+              "pm.test(\"Test string size\", () => {\r",
+              "    pm.expect(jsonData.name.length).to.be.at.most(255);\r",
+              "    pm.expect(jsonData.name.length).to.be.at.least(1);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"id\": 1,\r\n    \"name\": \"Data Science\",\r\n    \"classSize\": 10\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/courses",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "courses"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Course",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Delete request successful\", () => {\r",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 202, 204]);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/courses/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "courses",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
