@@ -1,0 +1,10 @@
+# .github/workflows/unit-tests.yml
+#
+# Runs fast feedback: unit tests on every PR and every push to main.
+# Produces a JaCoCo coverage report uploaded as a workflow artifact and
+# posted as a PR comment summary.
+#
+# Expects the standard Surefire naming convention: *Test.java / *Tests.java.
+# Requires the jacoco-maven-plugin to be configured in pom.xml (snippet at
+# bottom of this file in a comment)
+
