@@ -1,11 +1,6 @@
-# Nightly integration tests. Heavier than unit tests — expected to spin up
-# DB containers, hit local services, etc. Also runnable on demand from the
-# Actions tab via workflow_dispatch.
-#
-# Expects the standard Failsafe naming convention: *IT.java.
-# If your integration tests need Postgres / Redis / etc., uncomment the
-# `services:` block below and point your test config at localhost.
- 
+# Nightly integration tests.
+
+
 name: Integration Tests
  
 on:
