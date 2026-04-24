@@ -1,0 +1,77 @@
+# Weekly end-to-end tests
+ 
+name: E2E Tests
+ 
+on:
+  schedule:
+    # 03:00 UTC every Sunday.
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch, tag, or SHA to test (default: main)'
+        required: false
+        default: main
+      suite:
+        description: 'Optional specific test class or pattern (e.g. CheckoutE2E)'
+        required: false
+        default: ''
+ 
+concurrency:
+  group: e2e-tests-${{ github.ref }}
+  cancel-in-progress: false
+ 
+permissions:
+  contents: read
+  checks: write
+ 
+jobs:
+  e2e:
+    name: E2E tests (Java 21)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+ 
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+ 
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+ 
+      - name: Run E2E tests
+        run: |
+          if [ -n "${{ inputs.suite }}" ]; then
+            mvn -B -ntp -Pe2e -Dit.test=${{ inputs.suite }} verify
+          else
+            mvn -B -ntp -Pe2e verify
+          fi
+ 
+      - name: Upload E2E reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-reports
+          path: |
+            target/failsafe-reports/
+            target/surefire-reports/
+            target/screenshots/
+            target/videos/
+          retention-days: 30
+          if-no-files-found: ignore
+ 
+      - name: Publish E2E test report
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: E2E test results
+          path: |
+            target/failsafe-reports/TEST-*.xml
+            target/surefire-reports/TEST-*.xml
+          reporter: java-junit
+          fail-on-error: false
