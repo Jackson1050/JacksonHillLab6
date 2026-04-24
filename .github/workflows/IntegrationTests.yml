@@ -33,21 +33,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
  
-    # Uncomment to provide backing services to the tests.
-    # services:
-    #   postgres:
-    #     image: postgres:16
-    #     env:
-    #       POSTGRES_USER: test
-    #       POSTGRES_PASSWORD: test
-    #       POSTGRES_DB: test
-    #     ports: ['5432:5432']
-    #     options: >-
-    #       --health-cmd pg_isready
-    #       --health-interval 10s
-    #       --health-timeout 5s
-    #       --health-retries 5
- 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -62,24 +47,4 @@ jobs:
           cache: maven
  
       - name: Run integration tests
-        # `verify` runs Surefire then Failsafe. -DskipUTs isn't standard;
-        # if you want to skip unit tests here, use -Dtest=DoesNotExist or
-        # a profile that disables surefire.
         run: mvn -B -ntp verify
- 
-      - name: Upload Failsafe reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: failsafe-reports
-          path: target/failsafe-reports/
-          retention-days: 30
- 
-      - name: Publish integration test report
-        if: always()
-        uses: dorny/test-reporter@v1
-        with:
-          name: Integration test results
-          path: target/failsafe-reports/TEST-*.xml
-          reporter: java-junit
-          fail-on-error: false
