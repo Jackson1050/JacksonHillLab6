@@ -1,5 +1,3 @@
-# .github/workflows/unit-tests.yml
-#
 # Runs fast feedback: unit tests on every PR and every push to main.
 # Produces a JaCoCo coverage report uploaded as a workflow artifact and
 # posted as a PR comment summary.
